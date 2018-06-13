@@ -14,26 +14,23 @@ public class TripService {
     }
 
     public List<Trip> getTripsByUser(User user, User loggedUser) {
-        List<Trip> tripList = new ArrayList<Trip>();
-        boolean isFriend = false;
-        if (loggedUser != null) {
-            for (User friend : user.getFriends()) {
-                if (friend.equals(loggedUser)) {
-                    isFriend = true;
-                    break;
-                }
-            }
-            if (isFriend) {
-                tripList = findTripsBy(user);
-            }
-            return tripList;
-        } else {
-            throw new UserNotLoggedInException();
-        }
+        assertRequesterUserIsLoggedIn(loggedUser);
+
+        return user.isFriend(loggedUser) ?
+                findTripsBy(user) :
+                noTrips();
+    }
+
+    protected void assertRequesterUserIsLoggedIn(User loggedUser) {
+        if (loggedUser == null) throw new UserNotLoggedInException();
     }
 
     protected List<Trip> findTripsBy(User user) {
         return TripDAO.findTripsByUser(user);
+    }
+
+    protected ArrayList<Trip> noTrips() {
+        return new ArrayList<Trip>();
     }
 
 
