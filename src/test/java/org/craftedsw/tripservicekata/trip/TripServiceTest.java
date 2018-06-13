@@ -3,6 +3,7 @@ package org.craftedsw.tripservicekata.trip;
 import org.craftedsw.tripservicekata.exception.UserNotLoggedInException;
 import org.craftedsw.tripservicekata.user.User;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+
 
 public class TripServiceTest {
 
@@ -22,7 +23,8 @@ public class TripServiceTest {
     private static final Trip TOULOUSE = new Trip();
     private static final Trip BORDEAUX = new Trip();
 
-    private TripService tripService = new TripService();
+    private TripDAO tripDAO = Mockito.mock(TripDAO.class);
+    private TripService tripService = new TripService(tripDAO);
 
     @Test
     public void should_throw_user_not_logged_in_exception() {
@@ -45,11 +47,10 @@ public class TripServiceTest {
         friendUser.addTrip(TOULOUSE);
         friendUser.addTrip(BORDEAUX);
 
-        TripService testableTripService = spy(this.tripService);
-        doReturn(asList(TOULOUSE, BORDEAUX)).when(testableTripService).findTripsBy(friendUser);
+        doReturn(asList(TOULOUSE, BORDEAUX)).when(tripDAO).findTripsBy(friendUser);
 
         // when
-        List<Trip> tripsByUser = testableTripService.getTripsByUser(friendUser, LOGGED_USER);
+        List<Trip> tripsByUser = tripService.getTripsByUser(friendUser, LOGGED_USER);
 
         // then
         assertIterableEquals(asList(TOULOUSE, BORDEAUX), tripsByUser);
